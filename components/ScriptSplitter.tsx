@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { splitScriptForVeo, SplitMode } from "@/lib/splitScript";
+import { splitScriptForVeo } from "@/lib/splitScript";
 import { BRAND_PRESETS } from "@/lib/brandPresets";
 
 
 export default function ScriptSplitter() {
   const [script, setScript] = useState("");
   const [speed, setSpeed] = useState(2.25);
-  const [mode, setMode] = useState<SplitMode>("normal");
+  const [mode, setMode] = useState<"normal" | "nano">("normal");
   const [scenes, setScenes] = useState<any[]>([]);
   const [veoJSON, setVeoJSON] = useState("");
   const [brandKey, setBrandKey] = useState("oladprints");
@@ -76,7 +76,7 @@ export default function ScriptSplitter() {
 
         <select title="select"
           value={mode}
-          onChange={(e) => setMode(e.target.value as SplitMode)}
+          onChange={(e) => setMode(e.target.value as "normal" | "nano")}
           className="border rounded px-3 py-2 text-sm"
         >
           <option value="normal">8s Veo Mode</option>
@@ -107,15 +107,43 @@ export default function ScriptSplitter() {
       {/* Scene Output */}
       <div className="space-y-4">
         {scenes.map((scene) => (
-          <div
-            key={scene.scene}
-            className="p-4 border rounded-lg bg-gray-50"
-          >
-            <h4 className="font-semibold text-blue-600">
-              Scene {scene.scene} — {scene.duration}
-            </h4>
-            <p className="text-sm mt-2 text-gray-500">{scene.dialogue}</p>
-          </div>
+            <div
+                key={scene.scene}
+                className={`p-4 border rounded-lg ${
+                    scene.awkward ? "bg-yellow-50 border-yellow-400" : "bg-gray-50"
+                }`}
+                >
+                <div className="flex justify-between items-center">
+                    <h4 className="font-semibold text-blue-600">
+                    Scene {scene.scene}
+                    </h4>
+
+                    <span
+                    className={`text-xs font-medium px-2 py-1 rounded ${
+                        scene.wordCount > 20
+                        ? "bg-red-600 text-white"
+                        : "bg-green-600 text-white"
+                    }`}
+                    >
+                    {scene.wordCount} words
+                    </span>
+                </div>
+
+                <p className="text-sm mt-2">
+                    <strong>Dialogue:</strong> {scene.dialogue}
+                </p>
+
+                <p className="text-xs mt-2 text-gray-600 whitespace-pre-line">
+                    <strong>Visual Prompt:</strong>
+                    {"\n"}{scene.visualPrompt}
+                </p>
+
+                {scene.awkward && (
+                    <p className="mt-2 text-xs text-yellow-700 font-medium">
+                    ⚠️ Awkward cut detected — scene may feel too short.
+                    </p>
+                )}
+            </div>
         ))} 
       </div>
 
