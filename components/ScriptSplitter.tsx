@@ -51,6 +51,7 @@ export default function ScriptSplitter() {
     }));
 
     setVeoJSON(JSON.stringify(veoExport, null, 2));
+    
   }
 
   function copyJSON() {

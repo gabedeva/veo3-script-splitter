@@ -1,4 +1,5 @@
 // import { BrandPreset } from "./brandPresets";
+import { reflowScript } from "./reflowScript";
 import { generateVisualPrompt } from "./visualPrompt";
 
 const MAX_WORDS = 20;
@@ -54,30 +55,23 @@ export function splitScriptForVeo(
     mood: string;
   },
   {
-    mode = "normal",
-    wordsPerSecond,
+    mode = "normal", wordsPerSecond = 2.5,
   }: {
     mode?: "normal" | "nano";
-    wordsPerSecond?: number;
+    wordsPerSecond?: number
   }
 ) {
-  const sentences =
-    script.replace(/\n+/g, " ").match(/[^.!?]+[.!?]?/g) || [];
+  const reflowed = reflowScript(script);
 
-  let sceneIndex = 1;
-
-  return sentences.flatMap((sentence) =>
-    smartSplitSentence(sentence).map((text) => {
-      const wordCount = text.split(/\s+/).length;
-      const awkward = wordCount < AWKWARD_MIN_WORDS;
-
-      return {
-        scene: sceneIndex++,
-        dialogue: text,
-        wordCount,
-        awkward,
-        visualPrompt: generateVisualPrompt(text, brandConfig, mode),
-      };
-    })
-  );
+  return reflowed.map((scene, index) => ({
+    scene: index + 1,
+    dialogue: scene.text,
+    wordCount: scene.wordCount,
+    awkward: scene.awkward,
+    visualPrompt: generateVisualPrompt(
+      scene.text,
+      brandConfig,
+      mode
+    ),
+  }));
 }
