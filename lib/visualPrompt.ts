@@ -1,21 +1,28 @@
-import { BrandPreset } from "./brandPresets";
+// import { BrandPreset } from "./brandPresets";
 
 export function generateVisualPrompt(
   dialogue: string,
-  brand: BrandPreset,
+  {
+    brandName,
+    environment,
+    mood,
+  }: {
+    brandName: string;
+    environment: string;
+    mood: string;
+  },
   mode: "normal" | "nano"
 ) {
   if (mode === "nano") {
-    return `${brand.presenter || "presenter"}, ${brand.environment}, ${brand.mood}, cinematic`;
+    return `${brandName} presenter, ${environment}, ${mood}, cinematic`;
   }
 
   return `
-${brand.presenter || "Presenter"} speaking to camera.
-Environment: ${brand.environment}.
-Mood: ${brand.mood}.
-Lighting: ${brand.lighting}.
-Camera: ${brand.cameraStyle}.
-Color tone: ${brand.colorTone}.
+Presenter speaking to camera for ${brandName}.
+Environment: ${environment}.
+Mood: ${mood}.
+Lighting: cinematic lighting.
+Camera: smooth gimbal shots.
 Dialogue context: ${dialogue}
   `.trim();
 }

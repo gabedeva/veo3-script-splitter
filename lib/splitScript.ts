@@ -1,4 +1,4 @@
-import { BrandPreset } from "./brandPresets";
+// import { BrandPreset } from "./brandPresets";
 import { generateVisualPrompt } from "./visualPrompt";
 
 const MAX_WORDS = 20;
@@ -48,38 +48,36 @@ function smartSplitSentence(sentence: string): string[] {
 
 export function splitScriptForVeo(
   script: string,
-  brand: BrandPreset,
-  { mode = "normal" }: { mode?: "normal" | "nano"; wordsPerSecond?: number }
+  brandConfig: {
+    brandName: string;
+    environment: string;
+    mood: string;
+  },
+  {
+    mode = "normal",
+    wordsPerSecond,
+  }: {
+    mode?: "normal" | "nano";
+    wordsPerSecond?: number;
+  }
 ) {
   const sentences =
     script.replace(/\n+/g, " ").match(/[^.!?]+[.!?]?/g) || [];
 
-  const segments: {
-    scene: number;
-    dialogue: string;
-    wordCount: number;
-    awkward: boolean;
-    visualPrompt: string;
-  }[] = [];
-
   let sceneIndex = 1;
 
-  for (const sentence of sentences) {
-    const parts = smartSplitSentence(sentence);
-
-    for (const text of parts) {
+  return sentences.flatMap((sentence) =>
+    smartSplitSentence(sentence).map((text) => {
       const wordCount = text.split(/\s+/).length;
       const awkward = wordCount < AWKWARD_MIN_WORDS;
 
-      segments.push({
+      return {
         scene: sceneIndex++,
         dialogue: text,
         wordCount,
         awkward,
-        visualPrompt: generateVisualPrompt(text, brand, mode),
-      });
-    }
-  }
-
-  return segments;
+        visualPrompt: generateVisualPrompt(text, brandConfig, mode),
+      };
+    })
+  );
 }

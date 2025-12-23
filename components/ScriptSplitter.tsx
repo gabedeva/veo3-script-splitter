@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { splitScriptForVeo } from "@/lib/splitScript";
 import { BRAND_PRESETS } from "@/lib/brandPresets";
+import { MOODS, Mood } from "@/lib/moods";
 
 
 export default function ScriptSplitter() {
@@ -13,13 +14,20 @@ export default function ScriptSplitter() {
   const [veoJSON, setVeoJSON] = useState("");
   const [brandKey, setBrandKey] = useState("oladprints");
 
-  const brand = BRAND_PRESETS[brandKey];
+  const [brandName, setBrandName] = useState("");
+  const [environment, setEnvironment] = useState("");
+  const [mood, setMood] = useState<Mood>("professional");
 
   function handleSplit() {
-    const result = splitScriptForVeo(script, brand, {
-      wordsPerSecond: speed,
-      mode,
-    });
+    const result = splitScriptForVeo(
+    script,
+    {
+      brandName,
+      environment,
+      mood,
+    },
+    { mode, wordsPerSecond: speed }
+  );
 
     setScenes(result);
 
@@ -40,8 +48,6 @@ export default function ScriptSplitter() {
     duration: mode === "nano" ? "ultra-short" : "0-8s",
     dialogue: s.dialogue,
     visual_prompt: s.visualPrompt,
-    style: brand.mood,
-    brand: brand.name,
     }));
 
     setVeoJSON(JSON.stringify(veoExport, null, 2));
@@ -94,6 +100,36 @@ export default function ScriptSplitter() {
                 </option>
             ))}
         </select>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input
+            type="text"
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
+            placeholder="Type Brand name"
+            className="border rounded px-3 py-2 text-sm"
+          />
+
+          <input
+            type="text"
+            value={environment}
+            onChange={(e) => setEnvironment(e.target.value)}
+            placeholder="Env. (e.g. modern print shop in Lagos)"
+            className="border rounded px-3 py-2 text-sm"
+          />
+
+          <select title="mood"
+            value={mood}
+            onChange={(e) => setMood(e.target.value as Mood)}
+            className="border rounded px-3 py-2 text-sm"
+          >
+            {MOODS.map((m) => (
+              <option key={m} value={m}>
+                {m.charAt(0).toUpperCase() + m.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
 
 
         <button
