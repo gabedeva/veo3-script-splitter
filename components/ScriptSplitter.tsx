@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { splitScriptForVeo, SplitMode } from "@/lib/splitScript";
+import { BRAND_PRESETS } from "@/lib/brandPresets";
+
 
 export default function ScriptSplitter() {
   const [script, setScript] = useState("");
@@ -9,9 +11,12 @@ export default function ScriptSplitter() {
   const [mode, setMode] = useState<SplitMode>("normal");
   const [scenes, setScenes] = useState<any[]>([]);
   const [veoJSON, setVeoJSON] = useState("");
+  const [brandKey, setBrandKey] = useState("oladprints");
+
+  const brand = BRAND_PRESETS[brandKey];
 
   function handleSplit() {
-    const result = splitScriptForVeo(script, {
+    const result = splitScriptForVeo(script, brand, {
       wordsPerSecond: speed,
       mode,
     });
@@ -21,7 +26,7 @@ export default function ScriptSplitter() {
     const veo = result.map((s) => ({
       scene: s.scene,
       duration: mode === "nano" ? "ultra-short" : "0-8s",
-      dialogue: s.text,
+      dialogue: s.visualPrompt,
       style:
         mode === "nano"
           ? "ultra-short cinematic prompt"
@@ -29,6 +34,17 @@ export default function ScriptSplitter() {
     }));
 
     setVeoJSON(JSON.stringify(veo, null, 2));
+
+    const veoExport = result.map((s) => ({
+    scene: s.scene,
+    duration: mode === "nano" ? "ultra-short" : "0-8s",
+    dialogue: s.dialogue,
+    visual_prompt: s.visualPrompt,
+    style: brand.mood,
+    brand: brand.name,
+    }));
+
+    setVeoJSON(JSON.stringify(veoExport, null, 2));
   }
 
   function copyJSON() {
@@ -67,6 +83,19 @@ export default function ScriptSplitter() {
           <option value="nano">Nano Prompt Mode</option>
         </select>
 
+        <select title="brand select"
+            value={brandKey}
+            onChange={(e) => setBrandKey(e.target.value)}
+            className="border rounded px-3 py-2 text-sm"
+            >
+            {Object.entries(BRAND_PRESETS).map(([key, brand]) => (
+                <option key={key} value={key}>
+                {brand.name}
+                </option>
+            ))}
+        </select>
+
+
         <button
           onClick={handleSplit}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -85,9 +114,9 @@ export default function ScriptSplitter() {
             <h4 className="font-semibold text-blue-600">
               Scene {scene.scene} — {scene.duration}
             </h4>
-            <p className="text-sm mt-2 text-gray-500">{scene.text}</p>
+            <p className="text-sm mt-2 text-gray-500">{scene.dialogue}</p>
           </div>
-        ))}
+        ))} 
       </div>
 
       {/* Veo JSON Export */}
@@ -107,6 +136,7 @@ export default function ScriptSplitter() {
           </pre>
         </div>
       )}
+      
     </div>
   );
 }

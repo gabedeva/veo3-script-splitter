@@ -1,7 +1,11 @@
+import { BrandPreset } from "./brandPresets";
+import { generateVisualPrompt } from "./visualPrompt";
+
 export type SplitMode = "normal" | "nano";
-// function for split script
+
 export function splitScriptForVeo(
   script: string,
+  brand: BrandPreset,
   {
     wordsPerSecond = 2.25,
     durationSeconds = 8,
@@ -9,12 +13,12 @@ export function splitScriptForVeo(
   }: {
     wordsPerSecond?: number;
     durationSeconds?: number;
-    mode?: SplitMode;
+    mode?: "normal" | "nano";
   }
 ) {
   const maxWords =
     mode === "nano"
-      ? 8 // Nano prompts are very short
+      ? 8
       : Math.round(wordsPerSecond * durationSeconds);
 
   const sentences =
@@ -42,6 +46,7 @@ export function splitScriptForVeo(
   return segments.map((text, i) => ({
     scene: i + 1,
     duration: mode === "nano" ? "Nano" : "8s",
-    text,
+    dialogue: text,
+    visualPrompt: generateVisualPrompt(text, brand, mode),
   }));
 }
